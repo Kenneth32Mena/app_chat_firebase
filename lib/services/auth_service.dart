@@ -72,10 +72,19 @@ class AuthService {
     required String clave,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: correo.trim(),
         password: clave.trim(),
       );
+      final usuario = credential.user!;
+      await _firestore.collection('usuarios').doc(usuario.uid).set({
+        'uid': usuario.uid,
+        'correo': (usuario.email ?? correo).trim().toLowerCase(),
+        'nombre':
+            usuario.displayName ?? usuario.email?.split('@').first ?? 'Usuario',
+        'contactos': FieldValue.arrayUnion(<String>[]),
+      }, SetOptions(merge: true));
+      return credential;
     } on FirebaseAuthException catch (e) {
       throw _traducirErrorAuth(e.code);
     } catch (e) {

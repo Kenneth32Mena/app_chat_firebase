@@ -116,10 +116,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
           const SnackBar(content: Text('Contacto agregado correctamente.')),
         );
       }
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo agregar el contacto.')),
+          SnackBar(content: Text('No se pudo agregar el contacto: $error')),
         );
       }
     }
