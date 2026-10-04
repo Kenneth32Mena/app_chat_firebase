@@ -74,40 +74,39 @@ class _ChatScreenState extends State<ChatScreen> {
         curve: Curves.easeOut,
       );
     }
+  }
 
-    void _marcarMensajesComoVistos(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
-    ) {
-      final ids = docs
-          .where((doc) {
-            final data = doc.data();
-            return data['emisorUid'] != _miUid && data['estado'] != 'visto';
-          })
-          .map((doc) => doc.id)
-          .toList();
-      if (ids.isEmpty) return;
+  void _marcarMensajesComoVistos(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    final ids = docs
+        .where((doc) {
+          final data = doc.data();
+          return data['emisorUid'] != _miUid && data['estado'] != 'visto';
+        })
+        .map((doc) => doc.id)
+        .toList();
+    if (ids.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _chatService
+          .actualizarEstadoMensajes(
+            chatId: _chatId,
+            mensajeIds: ids,
+            estado: 'visto',
+          )
+          .catchError((_) {});
+    });
+  }
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _chatService
-            .actualizarEstadoMensajes(
-              chatId: _chatId,
-              mensajeIds: ids,
-              estado: 'visto',
-            )
-            .catchError((_) {});
-      });
+  Widget _indicadorEstado(String estado, Color color) {
+    if (estado == 'visto' || estado == 'recibido') {
+      return Icon(
+        Icons.done_all,
+        size: 16,
+        color: estado == 'visto' ? color : color.withValues(alpha: 0.7),
+      );
     }
-
-    Widget _indicadorEstado(String estado, Color color) {
-      if (estado == 'visto' || estado == 'recibido') {
-        return Icon(
-          Icons.done_all,
-          size: 16,
-          color: estado == 'visto' ? color : color.withValues(alpha: 0.7),
-        );
-      }
-      return Icon(Icons.done, size: 16, color: color.withValues(alpha: 0.7));
-    }
+    return Icon(Icons.done, size: 16, color: color.withValues(alpha: 0.7));
   }
 
   @override
