@@ -133,8 +133,15 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: _chatService.obtenerMensajes(_chatId),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Ocurrió un error al cargar los mensajes.'),
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'No se pudieron cargar los mensajes.\n'
+                        '${snapshot.error}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   );
                 }
 

@@ -18,10 +18,11 @@ class AuthService {
     required String clave,
   }) async {
     try {
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: correo.trim(),
-        password: clave.trim(),
-      );
+      final UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(
+            email: correo.trim(),
+            password: clave.trim(),
+          );
 
       final String uid = userCredential.user!.uid;
 
@@ -30,6 +31,7 @@ class AuthService {
         'uid': uid,
         'nombre': nombre.trim(),
         'correo': correo.trim(),
+        'contactos': <String>[],
       });
 
       // Actualizar el displayName en FirebaseAuth
