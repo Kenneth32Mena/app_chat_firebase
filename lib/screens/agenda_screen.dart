@@ -48,21 +48,32 @@ class _AgendaScreenState extends State<AgendaScreen> {
     if (correo == null || correo.trim().isEmpty || !mounted) return;
 
     try {
+      final correoBuscado = correo.trim().toLowerCase();
       final resultado = await FirebaseFirestore.instance
           .collection('usuarios')
-          .where('correo', isEqualTo: correo.trim())
-          .limit(1)
           .get();
 
       if (!mounted) return;
-      if (resultado.docs.isEmpty) {
+      final usuarioEncontrado = resultado.docs.where((doc) {
+        final correoUsuario = (doc.data()['correo'] as String?)
+            ?.trim()
+            .toLowerCase();
+        return correoUsuario == correoBuscado;
+      }).firstOrNull;
+
+      if (usuarioEncontrado == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No existe un usuario con ese correo.')),
+          SnackBar(
+            content: Text(
+              'No existe un usuario con el correo "$correoBuscado". '
+              'Verifica que la cuenta esté registrada.',
+            ),
+          ),
         );
         return;
       }
 
-      final contactoUid = resultado.docs.first.id;
+      final contactoUid = usuarioEncontrado.id;
       if (contactoUid == _miUid) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No puedes agregarte a ti mismo.')),
