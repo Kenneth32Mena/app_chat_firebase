@@ -316,6 +316,20 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
+                            if (!esMio) ...[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  widget.contactoNombre,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorPrimario,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                            ],
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
