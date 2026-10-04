@@ -8,6 +8,27 @@ class AuthService {
   // Stream para escuchar cambios en el estado de autenticación
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  Future<void> actualizarPresencia({
+    required bool online,
+    bool escribiendo = false,
+  }) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    await _firestore.collection('usuarios').doc(uid).set({
+      'online': online,
+      'escribiendo': escribiendo,
+      'ultimaConexion': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> actualizarEscribiendo(bool escribiendo) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    await _firestore.collection('usuarios').doc(uid).set({
+      'escribiendo': escribiendo,
+    }, SetOptions(merge: true));
+  }
+
   // Obtener usuario actual
   User? get usuarioActual => _auth.currentUser;
 

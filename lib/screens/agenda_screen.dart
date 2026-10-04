@@ -15,6 +15,19 @@ class AgendaScreen extends StatefulWidget {
 class _AgendaScreenState extends State<AgendaScreen> {
   final AuthService _authService = AuthService();
   final String _miUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final String _miCorreo = FirebaseAuth.instance.currentUser?.email ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    _authService.actualizarPresencia(online: true);
+  }
+
+  @override
+  void dispose() {
+    _authService.actualizarPresencia(online: false);
+    super.dispose();
+  }
 
   Future<void> _agregarContacto() async {
     final correoCtrl = TextEditingController();
@@ -120,11 +133,23 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.bubble_chart_rounded, size: 22),
-            SizedBox(width: 8),
-            Text('Contactos', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Icon(Icons.bubble_chart_rounded, size: 22),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Contactos',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Sesión iniciada como @${_miCorreo.isEmpty ? 'usuario' : _miCorreo}',
+                  style: const TextStyle(fontSize: 10),
+                ),
+              ],
+            ),
           ],
         ),
         actions: [

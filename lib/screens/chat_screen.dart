@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/chat_service.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -23,9 +24,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _mensajeCtrl = TextEditingController();
   final ScrollController _scrollCtrl = ScrollController();
   final ChatService _chatService = ChatService();
+  final AuthService _authService = AuthService();
   final String _miUid = FirebaseAuth.instance.currentUser?.uid ?? '';
   late final String _chatId;
   bool _enviando = false;
+  bool _escribiendo = false;
 
   @override
   void initState() {
@@ -35,9 +38,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    if (_escribiendo) {
+      _authService.actualizarEscribiendo(false);
+    }
     _mensajeCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _cambioTexto(String texto) {
+    final nuevoEstado = texto.trim().isNotEmpty;
+    if (nuevoEstado == _escribiendo) return;
+    _escribiendo = nuevoEstado;
+    _authService.actualizarEscribiendo(nuevoEstado);
   }
 
   Future<void> _enviar() async {
@@ -131,31 +144,58 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: isDark
-                  ? const Color(0xFF334155)
-                  : Colors.white24,
-              child: Text(
-                widget.contactoNombre.isNotEmpty
-                    ? widget.contactoNombre[0].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+        title: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(widget.contactoUid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            final datos = snapshot.data?.data() ?? {};
+            final online = datos['online'] == true;
+            final escribiendo = datos['escribiendo'] == true;
+            return Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: isDark
+                      ? const Color(0xFF334155)
+                      : Colors.white24,
+                  child: Text(
+                    widget.contactoNombre.isNotEmpty
+                        ? widget.contactoNombre[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                widget.contactoNombre,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.contactoNombre,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        escribiendo
+                            ? 'escribiendo...'
+                            : online
+                            ? 'en línea'
+                            : 'desconectado',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: escribiendo ? Colors.amber : Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
       body: Column(
@@ -364,6 +404,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       onSubmitted: (_) => _enviar(),
+                      onChanged: _cambioTexto,
                     ),
                   ),
                   const SizedBox(width: 6.0),
