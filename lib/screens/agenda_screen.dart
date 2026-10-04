@@ -70,9 +70,22 @@ class _AgendaScreenState extends State<AgendaScreen> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('usuarios').doc(_miUid).set({
-        'contactos': FieldValue.arrayUnion([contactoUid]),
-      }, SetOptions(merge: true));
+      final batch = FirebaseFirestore.instance.batch();
+      batch.set(
+        FirebaseFirestore.instance.collection('usuarios').doc(_miUid),
+        {
+          'contactos': FieldValue.arrayUnion([contactoUid]),
+        },
+        SetOptions(merge: true),
+      );
+      batch.set(
+        FirebaseFirestore.instance.collection('usuarios').doc(contactoUid),
+        {
+          'contactos': FieldValue.arrayUnion([_miUid]),
+        },
+        SetOptions(merge: true),
+      );
+      await batch.commit();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
