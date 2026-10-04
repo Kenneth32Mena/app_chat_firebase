@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "511977469552",
+    "project_id": "login-12b4b",
+    "storage_bucket": "login-12b4b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511977469552:android:101ad42759a2016dc026b5",
+        "android_client_info": {
+          "package_name": "com.example.app_chat_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMaGEgjpGAx0wAwX8w-N6gD3YPOBlk5XI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511977469552:android:55c0b5b8112072c7c026b5",
+        "android_client_info": {
+          "package_name": "com.example.app_tareas_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMaGEgjpGAx0wAwX8w-N6gD3YPOBlk5XI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
