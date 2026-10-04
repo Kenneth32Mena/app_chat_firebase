@@ -74,6 +74,40 @@ class _ChatScreenState extends State<ChatScreen> {
         curve: Curves.easeOut,
       );
     }
+
+    void _marcarMensajesComoVistos(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+    ) {
+      final ids = docs
+          .where((doc) {
+            final data = doc.data();
+            return data['emisorUid'] != _miUid && data['estado'] != 'visto';
+          })
+          .map((doc) => doc.id)
+          .toList();
+      if (ids.isEmpty) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _chatService
+            .actualizarEstadoMensajes(
+              chatId: _chatId,
+              mensajeIds: ids,
+              estado: 'visto',
+            )
+            .catchError((_) {});
+      });
+    }
+
+    Widget _indicadorEstado(String estado, Color color) {
+      if (estado == 'visto' || estado == 'recibido') {
+        return Icon(
+          Icons.done_all,
+          size: 16,
+          color: estado == 'visto' ? color : color.withValues(alpha: 0.7),
+        );
+      }
+      return Icon(Icons.done, size: 16, color: color.withValues(alpha: 0.7));
+    }
   }
 
   @override
@@ -150,6 +184,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 final docs = snapshot.data?.docs ?? [];
+                _marcarMensajesComoVistos(docs);
 
                 if (docs.isEmpty) {
                   return Center(
@@ -200,6 +235,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         ? enviadoEnValor
                         : null;
                     final bool esMio = emisorUid == _miUid;
+                    final String estado =
+                        data['estado'] as String? ?? 'enviado';
 
                     final String horaFormateada = enviadoEn != null
                         ? DateFormat('HH:mm').format(enviadoEn.toDate())
@@ -253,14 +290,25 @@ class _ChatScreenState extends State<ChatScreen> {
                               ),
                             ),
                             const SizedBox(height: 4.0),
-                            Text(
-                              horaFormateada,
-                              style: TextStyle(
-                                fontSize: 11.0,
-                                color:
-                                    (esMio ? colorTextoPropio : colorTextoAjeno)
-                                        .withValues(alpha: 0.7),
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  horaFormateada,
+                                  style: TextStyle(
+                                    fontSize: 11.0,
+                                    color:
+                                        (esMio
+                                                ? colorTextoPropio
+                                                : colorTextoAjeno)
+                                            .withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                if (esMio) ...[
+                                  const SizedBox(width: 3),
+                                  _indicadorEstado(estado, colorTextoPropio),
+                                ],
+                              ],
                             ),
                           ],
                         ),

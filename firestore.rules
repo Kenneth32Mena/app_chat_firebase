@@ -19,7 +19,7 @@ service cloud.firestore {
 
       // Acceso a mensajes según pertenencia al chat padre
       match /mensajes/{mensajeId} {
-        allow read, create: if request.auth != null &&
+        allow read, create, update: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantes;
       }
     }

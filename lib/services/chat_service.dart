@@ -32,9 +32,35 @@ class ChatService {
     }, SetOptions(merge: true));
 
     // 2. Guardar el nuevo mensaje en la subcolección
-    await _firestore.collection('chats').doc(chatId).collection('mensajes').add(
-      {'texto': texto.trim(), 'emisorUid': emisorUid, 'enviadoEn': ahora},
-    );
+    await _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('mensajes')
+        .add({
+          'texto': texto.trim(),
+          'emisorUid': emisorUid,
+          'enviadoEn': ahora,
+          'estado': 'enviado',
+        });
+  }
+
+  Future<void> actualizarEstadoMensajes({
+    required String chatId,
+    required Iterable<String> mensajeIds,
+    required String estado,
+  }) async {
+    final batch = _firestore.batch();
+    for (final mensajeId in mensajeIds) {
+      batch.update(
+        _firestore
+            .collection('chats')
+            .doc(chatId)
+            .collection('mensajes')
+            .doc(mensajeId),
+        {'estado': estado},
+      );
+    }
+    await batch.commit();
   }
 
   // Obtiene el Stream de mensajes ordenados cronológicamente
